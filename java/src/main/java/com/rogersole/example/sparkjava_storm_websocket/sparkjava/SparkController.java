@@ -1,4 +1,4 @@
-package test.ssw.message;
+package com.rogersole.example.sparkjava_storm_websocket.sparkjava;
 
 import static spark.SparkBase.awaitInitialization;
 import static spark.SparkBase.threadPool;
@@ -9,10 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import spark.Spark;
-import test.ssw.model.Trade;
-import test.ssw.queue.Producer;
-import test.ssw.queue.QueueException;
-import test.ssw.util.PropertiesLoader;
+
+import com.rogersole.example.sparkjava_storm_websocket.model.Trade;
+import com.rogersole.example.sparkjava_storm_websocket.sparkjava.queue.Producer;
+import com.rogersole.example.sparkjava_storm_websocket.sparkjava.queue.QueueException;
+import com.rogersole.example.sparkjava_storm_websocket.util.PropertiesLoader;
+import com.rogersole.example.sparkjava_storm_websocket.util.Utilities;
 
 
 /**
@@ -28,15 +30,15 @@ import test.ssw.util.PropertiesLoader;
  * @author rogersole
  *
  */
-public class TradesConsumer {
+public class SparkController {
 
-    Logger                         log = LoggerFactory.getLogger(TradesConsumer.class);
+    Logger                         log = LoggerFactory.getLogger(SparkController.class);
 
     final private PropertiesLoader tradesProperties;
     final private PropertiesLoader queuesProperties;
     private Producer               producer;
 
-    public TradesConsumer() throws IOException {
+    public SparkController() throws IOException {
         tradesProperties = new PropertiesLoader("trades.consumer.properties");
         tradesProperties.loadProperties();
         queuesProperties = new PropertiesLoader("queues.properties");
@@ -52,7 +54,8 @@ public class TradesConsumer {
 
 
         // Basic authentication defined in the environment variables
-        String authenticationAccepted = loadEnvOrDefault("SPARK_AUTHENTICATION", "4a5048e271c2742aa0418cf3c13d9b67");
+        String authenticationAccepted =
+                        Utilities.loadEnvOrDefault("SPARK_AUTHENTICATION", "4a5048e271c2742aa0418cf3c13d9b67");
         // Basic authentication performed before routing
         // NOTE: more complex authentication (based on SSL) can be done using 'Spark.secure' method
         // before the routings.
@@ -100,7 +103,8 @@ public class TradesConsumer {
                             queuesProperties.getInt("trades_consumer_queue_port", 5672),
                             queuesProperties.get("trades_consumer_queue_user", "guest"),
                             queuesProperties.get("trades_consumer_queue_pswd", "guest"),
-                            queuesProperties.get("trades_consumer_queue_name", "trades_consumer_queue"));
+                            "",
+                            queuesProperties.get("trades_consumer_routingkey", "trades_consumer_queue"));
         }
         catch (QueueException ex) {
             log.error(ex.toString());
@@ -118,35 +122,5 @@ public class TradesConsumer {
                 producer.close();
             }
             catch (QueueException dummy) {}
-    }
-
-
-    public static void main(String[] args) throws Exception {
-
-        TradesConsumer apiConsumer = new TradesConsumer();
-
-        // Adding shutdown hook to finalize all the initialized stuff
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                apiConsumer.close();
-            }
-        });
-
-        apiConsumer.init();
-    }
-
-    /**
-     * Loads the environment variable requested, and if not found returns the default value.
-     * 
-     * @param envVar: Environment variable to be loaded
-     * @param defaultReturn: String to be returned if env var not found
-     * @return String
-     */
-    private static String loadEnvOrDefault(String envVar, String defaultReturn) {
-        String value = System.getenv(envVar);
-        if (value == null)
-            value = defaultReturn;
-        return value;
     }
 }

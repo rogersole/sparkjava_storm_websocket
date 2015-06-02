@@ -1,4 +1,4 @@
-package test.ssw.queue;
+package com.rogersole.example.sparkjava_storm_websocket.sparkjava.queue;
 
 import java.io.IOException;
 
@@ -21,15 +21,17 @@ public abstract class Endpoint {
     protected int        port;
     protected String     username;
     protected String     password;
-    protected String     endpointName;
+    protected String     exchange;
+    protected String     routingKey;
 
-    public Endpoint(String host, int port, String username, String password, String endpointName)
+    public Endpoint(String host, int port, String username, String password, String exchange, String routingKey)
                     throws QueueException {
         this.host = host;
         this.port = port;
         this.username = username;
         this.password = password;
-        this.endpointName = endpointName;
+        this.exchange = exchange;
+        this.routingKey = routingKey;
 
         init();
     }
@@ -59,12 +61,12 @@ public abstract class Endpoint {
 
             // declaring a queue for this channel. If queue does not exist,
             // it will be created on the server.
-            channel.queueDeclare(endpointName, false, false, false, null);
+            channel.queueDeclare(routingKey, false, false, false, null);
         }
         catch (Exception ex) {
             ex.printStackTrace();
             throw new QueueException("Captured " + ex.getClass().getName() + " when creating the queue '"
-                            + endpointName + "': " + ex.toString());
+                            + routingKey + "': " + ex.toString());
         }
     }
 
@@ -81,7 +83,7 @@ public abstract class Endpoint {
         }
         catch (Exception ex) {
             ex.printStackTrace();
-            throw new QueueException("Captured " + ex.getClass().getName() + " when closing the queue '" + endpointName
+            throw new QueueException("Captured " + ex.getClass().getName() + " when closing the queue '" + routingKey
                             + "': " + ex.toString());
         }
     }

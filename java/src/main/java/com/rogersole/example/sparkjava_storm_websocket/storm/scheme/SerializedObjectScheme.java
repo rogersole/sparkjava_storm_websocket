@@ -1,11 +1,12 @@
-package test.ssw.storm;
+package com.rogersole.example.sparkjava_storm_websocket.storm.scheme;
 
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang.SerializationUtils;
 
-import test.ssw.model.Trade;
+import com.rogersole.example.sparkjava_storm_websocket.model.Trade;
+
 import backtype.storm.spout.Scheme;
 import backtype.storm.tuple.Fields;
 

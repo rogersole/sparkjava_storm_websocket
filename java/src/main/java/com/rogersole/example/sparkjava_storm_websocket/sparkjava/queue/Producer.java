@@ -1,6 +1,5 @@
-package test.ssw.queue;
+package com.rogersole.example.sparkjava_storm_websocket.sparkjava.queue;
 
-import java.io.IOException;
 import java.io.Serializable;
 
 import org.apache.commons.lang.SerializationUtils;
@@ -13,19 +12,19 @@ import org.apache.commons.lang.SerializationUtils;
  */
 public class Producer extends Endpoint {
 
-    public Producer(String host, int port, String username, String password, String endpointName)
+    public Producer(String host, int port, String username, String password, String exchange, String routingKey)
                     throws QueueException {
-        super(host, port, username, password, endpointName);
+        super(host, port, username, password, exchange, routingKey);
     }
 
     public void sendMessage(Serializable obj) throws QueueException {
         try {
-            channel.basicPublish("", endpointName, null, SerializationUtils.serialize(obj));
+            channel.basicPublish(exchange, routingKey, null, SerializationUtils.serialize(obj));
         }
-        catch (IOException ex) {
+        catch (Exception ex) {
             ex.printStackTrace();
             throw new QueueException("Captured " + ex.getClass().getName() + " exception while publishing to "
-                            + endpointName);
+                            + routingKey);
         }
     }
 }

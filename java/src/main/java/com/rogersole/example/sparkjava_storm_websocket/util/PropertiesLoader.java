@@ -1,4 +1,4 @@
-package test.ssw.util;
+package com.rogersole.example.sparkjava_storm_websocket.util;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

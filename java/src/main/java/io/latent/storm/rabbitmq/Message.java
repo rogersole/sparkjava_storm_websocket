@@ -27,9 +27,12 @@ public class Message {
                     String contentEncoding,
                     boolean persistent) {
         return (body != null && exchangeName != null && exchangeName.length() > 0) ?
-                        new MessageForSending(body, headers, exchangeName, routingKey, contentType, contentEncoding,
+                        new MessageForSending(body, headers, exchangeName, routingKey, contentType,
+                                        contentEncoding,
                                         persistent) :
                         NONE;
+        // return new MessageForSending(body, headers, exchangeName, routingKey, contentType,
+        // contentEncoding, persistent);
     }
 
     public byte[] getBody() {

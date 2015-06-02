@@ -1,4 +1,4 @@
-package test.ssw.storm;
+package com.rogersole.example.sparkjava_storm_websocket.storm.bolt;
 
 import java.util.Date;
 
@@ -13,9 +13,11 @@ import backtype.storm.tuple.Values;
 
 public class TradeAnalyser extends BaseBasicBolt {
 
-    Logger        log             = LoggerFactory.getLogger(TradeAnalyser.class);
+    private static final long serialVersionUID = 1L;
 
-    protected int numMessagesRead = 0;
+    Logger                    log              = LoggerFactory.getLogger(TradeAnalyser.class);
+
+    protected int             numMessagesRead  = 0;
 
     @Override
     public void execute(Tuple tuple, BasicOutputCollector collector) {

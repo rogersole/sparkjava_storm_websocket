@@ -1,4 +1,4 @@
-package test.ssw.model;
+package com.rogersole.example.sparkjava_storm_websocket.model;
 
 import java.io.Serializable;
 import java.lang.annotation.ElementType;

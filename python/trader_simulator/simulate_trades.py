@@ -19,7 +19,7 @@ from utils import countries_iso2, currencies_iso
 logging.basicConfig(level="DEBUG")
 logger = logging.getLogger(__name__)
 
-# upgrade requests logger level to INFO
+# change requests logger level to ERROR
 logging.getLogger('requests').setLevel(logging.ERROR)
 
 
@@ -30,7 +30,7 @@ if not config.read(path.join(path.dirname(__file__), '..', 'cfg', 'trader.cfg'))
 
 
 class Simulator(object):
-    """ Simluates the trades randomly choosen
+    """ Simulates the trades randomly chosen
     """
     def __init__(self):
         """

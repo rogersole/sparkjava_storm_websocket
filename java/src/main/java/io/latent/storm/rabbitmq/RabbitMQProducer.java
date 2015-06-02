@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import backtype.storm.topology.ReportedFailedException;
 
-import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.AlreadyClosedException;
 import com.rabbitmq.client.BlockedListener;
 import com.rabbitmq.client.Channel;
@@ -30,6 +29,7 @@ public class RabbitMQProducer implements Serializable {
     private transient ConnectionConfig connectionConfig;
     private transient Connection       connection;
     private transient Channel          channel;
+    private transient Map              config;
 
     private boolean                    blocked = false;
 
@@ -53,7 +53,9 @@ public class RabbitMQProducer implements Serializable {
                 try {
                     Thread.sleep(100);
                 }
-                catch (InterruptedException ie) {}
+                catch (InterruptedException ie) {
+                    ie.printStackTrace();
+                }
             } else {
                 sendMessageActual(message);
                 return;
@@ -66,37 +68,44 @@ public class RabbitMQProducer implements Serializable {
         reinitIfNecessary();
         if (channel == null) throw new ReportedFailedException("No connection to RabbitMQ");
         try {
-            AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder()
-                            .contentType(message.getContentType())
-                            .contentEncoding(message.getContentEncoding())
-                            .deliveryMode((message.isPersistent()) ? 2 : 1)
-                            .headers(message.getHeaders())
-                            .build();
-            channel.basicPublish(message.getExchangeName(), message.getRoutingKey(), properties, message.getBody());
+            // AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder()
+            // .contentType(message.getContentType())
+            // .contentEncoding(message.getContentEncoding())
+            // .deliveryMode((message.isPersistent()) ? 2 : 1)
+            // .headers(message.getHeaders())
+            // .build();
+            channel.basicPublish(message.getExchangeName(), message.getRoutingKey(), /* properties */null,
+                            message.getBody());
         }
         catch (AlreadyClosedException ace) {
+            ace.printStackTrace();
             logger.error("already closed exception while attempting to send message", ace);
             reset();
             throw new ReportedFailedException(ace);
         }
         catch (IOException ioe) {
+            ioe.printStackTrace();
             logger.error("io exception while attempting to send message", ioe);
             reset();
             throw new ReportedFailedException(ioe);
         }
         catch (Exception e) {
+            e.printStackTrace();
             logger.warn("Unexpected error while sending message. Backing off for a bit before trying again (to allow time for recovery)",
                             e);
             try {
                 Thread.sleep(1000);
             }
-            catch (InterruptedException ie) {}
+            catch (InterruptedException ie) {
+                ie.printStackTrace();
+            }
         }
     }
 
     public void open(final Map config) {
         logger = LoggerFactory.getLogger(RabbitMQProducer.class);
         connectionConfig = ProducerConfig.getFromStormConfig(config).getConnectionConfig();
+        this.config = config;
         internalOpen();
     }
 
@@ -104,11 +113,18 @@ public class RabbitMQProducer implements Serializable {
         try {
             connection = createConnection();
             channel = connection.createChannel();
+            String exchangeName = (String) config.get("rabbitmq.exchangeName");
+            channel.exchangeDeclare(exchangeName, "direct");
+            String routingKey = (String) config.get("rabbitmq.routingKey");
+            channel.queueDeclare(routingKey, false, false, false, null);
+            channel.queueBind(routingKey, exchangeName, "");
+            // channel.exchangeBind(destination, source, routingKey)
 
             // run any declaration prior to message sending
             declarator.execute(channel);
         }
         catch (Exception e) {
+            e.printStackTrace();
             logger.error("could not open connection on rabbitmq", e);
             reset();
         }
@@ -121,6 +137,7 @@ public class RabbitMQProducer implements Serializable {
             }
         }
         catch (Exception e) {
+            e.printStackTrace();
             logger.debug("error closing channel", e);
         }
         try {
@@ -128,6 +145,7 @@ public class RabbitMQProducer implements Serializable {
             connection.close();
         }
         catch (Exception e) {
+            e.printStackTrace();
             logger.debug("error closing connection", e);
         }
         channel = null;

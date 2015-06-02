@@ -6,6 +6,42 @@
 - RabbitMQ installed and running
 - Apache Maven 3.2.5
 
+## Python trader
+
+- Install requirements
+
+```bash
+cd python_trader
+pip install -r requirements/requirements.txt
+```
+
+- TODO: configure trader.cfg with host where Consumer is being launched
+
+- Run the simluator
+
+```bash
+cd python_trader
+python trader/simulate_trades.py
+```
+
+
+## Start project parts
+
+- Trades simulator:
+
+```bash
+cd sparkjava_storm_websocket/python
+source .venv/bin/activate
+python trader_simulator/simulate_trades.py
+```
+
+- RabbitMQ:
+
+- SparkJava endpoint (message consumer):  
+
+- Apache Storm topology (message processor):  
+
+
 ## Architecture schema
 
 ```
@@ -105,19 +141,3 @@ The json sent through websocket has the following format:
 - TODO: better authentication, not hardcoded
 
 
-## Python trader
-
-- Install requirements
-
-```bash
-cd python_trader
-pip install -r requirements/requirements.txt
-``
-- TODO: configure trader.cfg with host where Consumer is being launched
-
-- Run the simluator
-
-```bash
-cd python_trader
-python trader/simulate_trades.py
-```

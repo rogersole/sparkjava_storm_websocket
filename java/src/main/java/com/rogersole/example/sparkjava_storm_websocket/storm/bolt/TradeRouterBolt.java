@@ -1,6 +1,5 @@
-package test.ssw.storm;
+package com.rogersole.example.sparkjava_storm_websocket.storm.bolt;
 
-import test.ssw.model.Trade;
 import backtype.storm.topology.BasicOutputCollector;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseBasicBolt;
@@ -8,7 +7,11 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 
+import com.rogersole.example.sparkjava_storm_websocket.model.Trade;
+
 public class TradeRouterBolt extends BaseBasicBolt {
+
+    private static final long serialVersionUID = 1L;
 
     @Override
     public void execute(Tuple input, BasicOutputCollector collector) {
