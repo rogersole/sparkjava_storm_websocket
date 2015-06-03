@@ -29,7 +29,6 @@ public class RabbitMQProducer implements Serializable {
     private transient ConnectionConfig connectionConfig;
     private transient Connection       connection;
     private transient Channel          channel;
-    private transient Map              config;
 
     private boolean                    blocked = false;
 
@@ -105,7 +104,6 @@ public class RabbitMQProducer implements Serializable {
     public void open(final Map config) {
         logger = LoggerFactory.getLogger(RabbitMQProducer.class);
         connectionConfig = ProducerConfig.getFromStormConfig(config).getConnectionConfig();
-        this.config = config;
         internalOpen();
     }
 
@@ -113,12 +111,6 @@ public class RabbitMQProducer implements Serializable {
         try {
             connection = createConnection();
             channel = connection.createChannel();
-            String exchangeName = (String) config.get("rabbitmq.exchangeName");
-            channel.exchangeDeclare(exchangeName, "direct");
-            String routingKey = (String) config.get("rabbitmq.routingKey");
-            channel.queueDeclare(routingKey, false, false, false, null);
-            channel.queueBind(routingKey, exchangeName, "");
-            // channel.exchangeBind(destination, source, routingKey)
 
             // run any declaration prior to message sending
             declarator.execute(channel);

@@ -22,6 +22,7 @@ import com.rabbitmq.client.ConnectionFactory;
 import com.rogersole.example.sparkjava_storm_websocket.storm.bolt.TradeAnalyserBuyBolt;
 import com.rogersole.example.sparkjava_storm_websocket.storm.bolt.TradeAnalyserSellBolt;
 import com.rogersole.example.sparkjava_storm_websocket.storm.bolt.TradeRouterBolt;
+import com.rogersole.example.sparkjava_storm_websocket.storm.declarator.QueueDeclarator;
 import com.rogersole.example.sparkjava_storm_websocket.storm.scheme.SerializedObjectScheme;
 import com.rogersole.example.sparkjava_storm_websocket.storm.scheme.TradeToMessage;
 import com.rogersole.example.sparkjava_storm_websocket.util.PropertiesLoader;
@@ -43,6 +44,8 @@ public class StormController {
     private ConsumerConfig         rabbitMQSpoutConfig;
     private ProducerConfig         rabbitMQBuyBoltConfig;
     private ProducerConfig         rabbitMQSellBoltConfig;
+    private QueueDeclarator        buyDeclarator;
+    private QueueDeclarator        sellDeclarator;
     private TopologyBuilder        builder;
     private LocalCluster           cluster;
 
@@ -85,10 +88,14 @@ public class StormController {
                                         queuesProperties.get("trades_buy_processed_queue_pswd", "guest"),
                                         ConnectionFactory.DEFAULT_VHOST,
                                         queuesProperties.getInt("trades_buy_processed_queue_heartbeat", 10));
+
         rabbitMQBuyBoltConfig = new ProducerConfig(buyConnConfig,
                         queuesProperties.get("trades_buy_processed_exchange", "buy_exchange"),
                         queuesProperties.get("trades_buy_processed_routingkey", "trades_buy_processed_queue"),
                         "", "", false);
+
+        buyDeclarator = new QueueDeclarator(queuesProperties.get("trades_buy_processed_exchange", "buy_exchange"),
+                        queuesProperties.get("trades_buy_processed_routingkey", "trades_buy_processed_queue"));
 
         // create the bolt config object to handle sell stuff
         ConnectionConfig sellConnConfig =
@@ -98,10 +105,14 @@ public class StormController {
                                         queuesProperties.get("trades_sell_processed_queue_pswd", "guest"),
                                         ConnectionFactory.DEFAULT_VHOST,
                                         queuesProperties.getInt("trades_sell_processed_queue_heartbeat", 10));
-        rabbitMQSellBoltConfig = new ProducerConfig(buyConnConfig,
+
+        rabbitMQSellBoltConfig = new ProducerConfig(sellConnConfig,
                         queuesProperties.get("trades_sell_processed_exchange", "sell_exchange"),
                         queuesProperties.get("trades_sell_processed_routingkey", "trades_sell_processed_queue"),
                         "", "", false);
+
+        sellDeclarator = new QueueDeclarator(queuesProperties.get("trades_sell_processed_exchange", "sell_exchange"),
+                        queuesProperties.get("trades_sell_processed_routingkey", "trades_sell_processed_queue"));
     }
 
     public void buildTopology()
@@ -122,11 +133,11 @@ public class StormController {
         // analyses the sell-related information
         builder.setBolt("sell-analyser", new TradeAnalyserSellBolt()).shuffleGrouping("router", "sell");
         // publishes the buy analysis results to a rabbitMQ queue
-        builder.setBolt("buy-rabbitmq", new RabbitMQBolt(boltScheme))
+        builder.setBolt("buy-rabbitmq", new RabbitMQBolt(boltScheme, buyDeclarator))
                         .addConfigurations(rabbitMQBuyBoltConfig.asMap())
                         .shuffleGrouping("buy-analyser", "buy-out");
         // publishes the sell analysis results to a rabbitMQ queue
-        builder.setBolt("sell-rabbitmq", new RabbitMQBolt(boltScheme))
+        builder.setBolt("sell-rabbitmq", new RabbitMQBolt(boltScheme, sellDeclarator))
                         .addConfigurations(rabbitMQSellBoltConfig.asMap())
                         .shuffleGrouping("sell-analyser", "sell-out");
     }

@@ -1,4 +1,5 @@
-# Test CurrencyFair
+# 
+## SparkJava + RabbitMQ + Apache Storm + Apache Camel + Websocket
 
 ## System requirements
 
@@ -40,6 +41,8 @@ python trader_simulator/simulate_trades.py
 - SparkJava endpoint (message consumer):  
 
 - Apache Storm topology (message processor):  
+
+- Storm - RabbitMQ: https://github.com/ppat/storm-rabbitmq
 
 
 ## Architecture schema
