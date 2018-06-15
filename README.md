@@ -89,7 +89,8 @@ JSON formatted:
 	"amountBuy":           747.10, 
 	"rate":                0.7471, 
 	"timePlaced" :         "24-JAN-15 10:27:44", 
-	"originatingCountry" : "FR"}
+	"originatingCountry" : "FR"
+}
 ```
 
 ## Data processed
@@ -100,13 +101,13 @@ _TODO_: fulfill this paragraph
 
 Frontend will show a table with real-time data of the top X selled/bougth currencies during the last X minutes. The table could be something like the following example:
 
-|--|--|  
+|--|--|--|
 |**Last X minutes sold**|**Last X minutes bought**| |
 |EUR: 1.250 (0.7564)|GBP: 820 (1.4322)| |
 | _FR (3x), US (2x), UK (1x)_ | _SP (20x), UK (13x), NZ (2x)_ | _# This are the top 3 **sold from** and **bought from** countries (and times)_ |  
 |GBP:  823 (0.8235)|USD: 2.234 (0.2341)| |
 | _FR (3x), US (2x), UK (1x)_ | _SP (20x), UK (13x), NZ (2x)_ | _# This are the top 3 **sold from** and **bought from** countries (and times)_ |  
-|...|...| |
+|...|...|...|
 
 The json sent through websocket has the following format:
 
